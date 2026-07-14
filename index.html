@@ -658,13 +658,17 @@ async function initStorage() {
   const cloudCount = Object.keys(cloudSelections).length;
   const localCount = Object.keys(localSelections).length;
 
-  if (cloudCount >= localCount) {
+  if (cloudCount >= localCount && cloudCount > 0) {
     selections = cloudSelections;
-  } else {
+  } else if (localCount > 0) {
     // Local has more data (e.g. CORS blocked cloud saves) — use local and sync to cloud
     selections = localSelections;
-    console.log('Local has more data than cloud, syncing up...');
-    saveToCloud();
+    try {
+      await saveToCloud();
+      showToast(`Recovered ${localCount} saved answers and synced to cloud`);
+    } catch (e) {
+      showToast('Found saved answers locally but cloud sync failed', true);
+    }
   }
 }
 
@@ -673,7 +677,7 @@ async function saveToCloud() {
   localStorage.setItem('icon-wardrobe-selections', JSON.stringify(selections));
 
   try {
-    await fetch(`https://api.jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
+    const res = await fetch(`https://api.jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
@@ -683,8 +687,16 @@ async function saveToCloud() {
         answered: Object.keys(selections).length
       })
     });
+    if (res.ok) {
+      document.getElementById('submitInfo').innerHTML =
+        'Saved to cloud &check;';
+    } else {
+      document.getElementById('submitInfo').innerHTML =
+        'Cloud save failed — saved locally';
+    }
   } catch (e) {
-    console.log('Cloud save failed, data preserved locally');
+    document.getElementById('submitInfo').innerHTML =
+      'Cloud save failed — saved locally';
   }
 }
 
