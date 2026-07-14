@@ -631,6 +631,15 @@ let saveTimeout = null;
 
 // ── JSONBLOB PERSISTENCE ──
 async function initStorage() {
+  // Load localStorage backup first
+  let localSelections = {};
+  const local = localStorage.getItem('icon-wardrobe-selections');
+  if (local) {
+    try { localSelections = JSON.parse(local); } catch (e) {}
+  }
+
+  // Try cloud
+  let cloudSelections = {};
   try {
     const res = await fetch(`https://api.jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
@@ -638,16 +647,24 @@ async function initStorage() {
     if (res.ok) {
       const data = await res.json();
       if (data.selections) {
-        selections = data.selections;
+        cloudSelections = data.selections;
       }
     }
   } catch (e) {
-    console.log('Could not load saved data, starting fresh');
-    // Fall back to localStorage
-    const local = localStorage.getItem('icon-wardrobe-selections');
-    if (local) {
-      try { selections = JSON.parse(local); } catch (e2) {}
-    }
+    console.log('Could not reach cloud, using local data');
+  }
+
+  // Use whichever has more answers (merge strategy: most data wins)
+  const cloudCount = Object.keys(cloudSelections).length;
+  const localCount = Object.keys(localSelections).length;
+
+  if (cloudCount >= localCount) {
+    selections = cloudSelections;
+  } else {
+    // Local has more data (e.g. CORS blocked cloud saves) — use local and sync to cloud
+    selections = localSelections;
+    console.log('Local has more data than cloud, syncing up...');
+    saveToCloud();
   }
 }
 
