@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICON. AMSTERDAM — Wardrobe Review</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --cream: #F7F4ED;
+    --black: #000000;
+    --white: #FFFFFF;
+    --keep: #1a7a3a;
+    --keep-bg: #e8f5ec;
+    --unsure: #b8860b;
+    --unsure-bg: #fdf6e3;
+    --giveaway: #c0392b;
+    --giveaway-bg: #fdecea;
+    --border: rgba(0,0,0,0.12);
+    --shadow: 0 2px 20px rgba(0,0,0,0.08);
+    --shadow-hover: 0 8px 40px rgba(0,0,0,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cream);
+    color: var(--black);
+    overflow-x: hidden;
+  }
+
+  /* ── LOADING SCREEN ── */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--black);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+  }
+  #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  #loader .logo-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700; font-size: 3rem;
+    letter-spacing: 0.15em; color: var(--white);
+    opacity: 0; transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards 0.3s;
+  }
+  #loader .logo-text span { color: var(--cream); opacity: 0.5; }
+  #loader .subtitle {
+    font-weight: 300; font-size: 0.9rem;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-top: 12px;
+    opacity: 0; transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards 0.8s;
+  }
+  #loader .loader-bar {
+    width: 200px; height: 2px;
+    background: rgba(255,255,255,0.1);
+    margin-top: 40px; overflow: hidden;
+    opacity: 0; animation: fadeInUp 0.6s ease forwards 1.2s;
+  }
+  #loader .loader-bar::after {
+    content: ''; display: block;
+    width: 40%; height: 100%;
+    background: var(--white);
+    animation: loadSlide 1.5s ease-in-out infinite;
+  }
+
+  @keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes loadSlide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--black); color: var(--white);
+    padding: 40px 0 30px;
+    text-align: center;
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  header h1 {
+    font-weight: 700; font-size: 1.8rem;
+    letter-spacing: 0.12em;
+  }
+  header h1 span { opacity: 0.4; }
+  header p {
+    font-weight: 300; font-size: 0.8rem;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    opacity: 0.5; margin-top: 6px;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    background: var(--black);
+    padding: 0 40px 20px;
+    position: sticky; top: 88px; z-index: 99;
+  }
+  .progress-inner {
+    max-width: 900px; margin: 0 auto;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .progress-bar {
+    flex: 1; height: 3px;
+    background: rgba(255,255,255,0.1);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: var(--white);
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .progress-text {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.75rem; font-weight: 500;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    position: sticky; top: 111px; z-index: 98;
+  }
+  .stats-inner {
+    max-width: 900px; margin: 0 auto;
+    display: flex; justify-content: center; gap: 40px;
+  }
+  .stat {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.8rem; font-weight: 500;
+  }
+  .stat .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .stat.keep .dot { background: var(--keep); }
+  .stat.unsure .dot { background: var(--unsure); }
+  .stat.giveaway .dot { background: var(--giveaway); }
+  .stat .count { font-weight: 700; }
+
+  /* ── FILTER TABS ── */
+  .filter-bar {
+    max-width: 900px; margin: 30px auto 0;
+    padding: 0 20px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+  }
+  .filter-btn {
+    border: 1px solid var(--border);
+    background: var(--white);
+    padding: 8px 18px;
+    font-family: inherit; font-size: 0.75rem;
+    font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .filter-btn:hover { border-color: var(--black); }
+  .filter-btn.active {
+    background: var(--black); color: var(--white);
+    border-color: var(--black);
+  }
+
+  /* ── MAIN GRID ── */
+  .container {
+    max-width: 940px;
+    margin: 30px auto 120px;
+    padding: 0 20px;
+  }
+
+  .category-label {
+    font-weight: 700; font-size: 0.7rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(0,0,0,0.4);
+    padding: 30px 0 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  /* ── ITEM CARD ── */
+  .item-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    display: flex; align-items: stretch;
+    margin-bottom: 12px;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+  }
+  .item-card.visible {
+    opacity: 1; transform: translateY(0);
+  }
+  .item-card.answered {
+    border-left: 4px solid transparent;
+  }
+  .item-card.answered-keep { border-left-color: var(--keep); }
+  .item-card.answered-unsure { border-left-color: var(--unsure); }
+  .item-card.answered-giveaway { border-left-color: var(--giveaway); }
+
+  .item-image {
+    width: 100px; min-height: 100px;
+    background: var(--cream);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .item-image img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  .item-card:hover .item-image img {
+    transform: scale(1.08);
+  }
+  .item-image .placeholder {
+    font-size: 0.6rem; color: rgba(0,0,0,0.25);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    text-align: center; padding: 10px;
+  }
+
+  .item-body {
+    flex: 1; padding: 16px 20px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .item-name {
+    font-weight: 600; font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+    max-width: 280px;
+  }
+  .item-link {
+    font-size: 0.65rem;
+    color: rgba(0,0,0,0.35);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 4px;
+    display: block;
+    transition: color 0.2s;
+  }
+  .item-link:hover { color: var(--black); }
+
+  /* ── CHOICE BUTTONS ── */
+  .choices {
+    display: flex; gap: 6px;
+    flex-shrink: 0;
+  }
+  .choice-btn {
+    border: 1.5px solid var(--border);
+    background: transparent;
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .choice-btn::before {
+    content: ''; position: absolute; inset: 0;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 0;
+  }
+  .choice-btn span { position: relative; z-index: 1; }
+
+  .choice-btn.keep { border-color: rgba(26,122,58,0.3); color: var(--keep); }
+  .choice-btn.keep::before { background: var(--keep-bg); }
+  .choice-btn.keep:hover::before,
+  .choice-btn.keep.selected::before { transform: scaleX(1); }
+  .choice-btn.keep.selected {
+    border-color: var(--keep);
+    background: var(--keep); color: var(--white);
+    box-shadow: 0 2px 12px rgba(26,122,58,0.3);
+    transform: scale(1.05);
+  }
+
+  .choice-btn.unsure { border-color: rgba(184,134,11,0.3); color: var(--unsure); }
+  .choice-btn.unsure::before { background: var(--unsure-bg); }
+  .choice-btn.unsure:hover::before,
+  .choice-btn.unsure.selected::before { transform: scaleX(1); }
+  .choice-btn.unsure.selected {
+    border-color: var(--unsure);
+    background: var(--unsure); color: var(--white);
+    box-shadow: 0 2px 12px rgba(184,134,11,0.3);
+    transform: scale(1.05);
+  }
+
+  .choice-btn.giveaway { border-color: rgba(192,57,43,0.3); color: var(--giveaway); }
+  .choice-btn.giveaway::before { background: var(--giveaway-bg); }
+  .choice-btn.giveaway:hover::before,
+  .choice-btn.giveaway.selected::before { transform: scaleX(1); }
+  .choice-btn.giveaway.selected {
+    border-color: var(--giveaway);
+    background: var(--giveaway); color: var(--white);
+    box-shadow: 0 2px 12px rgba(192,57,43,0.3);
+    transform: scale(1.05);
+  }
+
+  /* ── SUBMIT SECTION ── */
+  .submit-section {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--black);
+    padding: 20px 40px;
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 100;
+  }
+  .submit-section.visible { transform: translateY(0); }
+  .submit-inner {
+    max-width: 900px; margin: 0 auto;
+    display: flex; align-items: center;
+    justify-content: space-between;
+  }
+  .submit-info {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.8rem;
+  }
+  .submit-btn {
+    background: var(--white);
+    color: var(--black);
+    border: none;
+    padding: 14px 40px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .submit-btn:hover {
+    background: var(--cream);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(255,255,255,0.2);
+  }
+  .submit-btn:disabled {
+    opacity: 0.3; cursor: not-allowed;
+    transform: none; box-shadow: none;
+  }
+
+  /* ── SAVED TOAST ── */
+  .toast {
+    position: fixed; top: 30px; right: 30px;
+    background: var(--keep); color: var(--white);
+    padding: 16px 28px;
+    font-size: 0.85rem; font-weight: 600;
+    letter-spacing: 0.03em;
+    z-index: 10000;
+    transform: translateX(120%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.error { background: var(--giveaway); }
+
+  /* ── SUMMARY OVERLAY ── */
+  .overlay {
+    position: fixed; inset: 0; z-index: 9998;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    opacity: 0; visibility: hidden;
+    transition: all 0.4s ease;
+  }
+  .overlay.visible { opacity: 1; visibility: visible; }
+  .summary-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 500px; max-width: 90vw;
+    background: var(--white);
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+    padding: 40px;
+  }
+  .summary-panel.visible { transform: translateX(0); }
+  .summary-panel h2 {
+    font-size: 1.3rem; font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .summary-panel .summary-subtitle {
+    font-size: 0.8rem; color: rgba(0,0,0,0.4);
+    letter-spacing: 0.05em; margin-bottom: 30px;
+  }
+  .summary-group { margin-bottom: 28px; }
+  .summary-group h3 {
+    font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .summary-group h3 .sdot {
+    width: 8px; height: 8px; border-radius: 50; display: inline-block;
+  }
+  .summary-group.keep h3 { color: var(--keep); }
+  .summary-group.keep h3 .sdot { background: var(--keep); border-radius: 50%; }
+  .summary-group.unsure h3 { color: var(--unsure); }
+  .summary-group.unsure h3 .sdot { background: var(--unsure); border-radius: 50%; }
+  .summary-group.giveaway h3 { color: var(--giveaway); }
+  .summary-group.giveaway h3 .sdot { background: var(--giveaway); border-radius: 50%; }
+  .summary-group ul {
+    list-style: none; padding: 0;
+  }
+  .summary-group li {
+    padding: 6px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  .summary-close {
+    position: absolute; top: 20px; right: 20px;
+    background: none; border: 1px solid var(--border);
+    width: 36px; height: 36px;
+    font-size: 1.2rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .summary-close:hover {
+    background: var(--black); color: var(--white);
+  }
+  .summary-unanswered {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(0,0,0,0.03);
+    font-size: 0.8rem;
+    color: rgba(0,0,0,0.5);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .item-body { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .choices { width: 100%; }
+    .choice-btn { flex: 1; text-align: center; padding: 10px 8px; font-size: 0.65rem; }
+    .item-name { max-width: 100%; }
+    .stats-inner { gap: 20px; }
+    .submit-inner { flex-direction: column; gap: 12px; text-align: center; }
+    .filter-btn { padding: 6px 12px; font-size: 0.65rem; }
+    header { padding: 30px 0 20px; }
+    header h1 { font-size: 1.3rem; }
+  }
+
+  /* ── CARD HIDDEN BY FILTER ── */
+  .item-card.filter-hidden {
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loader">
+  <div class="logo-text">ICON<span>.</span></div>
+  <div class="subtitle">Wardrobe Review</div>
+  <div class="loader-bar"></div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <h1>ICON<span>.</span> AMSTERDAM</h1>
+  <p>Byron's Wardrobe Review</p>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 60</div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat keep"><div class="dot"></div> Definitely Keep: <span class="count" id="countKeep">0</span></div>
+    <div class="stat unsure"><div class="dot"></div> Not Sure: <span class="count" id="countUnsure">0</span></div>
+    <div class="stat giveaway"><div class="dot"></div> OK to Give Away: <span class="count" id="countGiveaway">0</span></div>
+  </div>
+</div>
+
+<!-- FILTER TABS -->
+<div class="filter-bar" id="filterBar"></div>
+
+<!-- MAIN CONTENT -->
+<div class="container" id="itemsContainer"></div>
+
+<!-- SUBMIT BAR -->
+<div class="submit-section" id="submitSection">
+  <div class="submit-inner">
+    <div class="submit-info" id="submitInfo">Selections auto-save as you go</div>
+    <button class="submit-btn" id="submitBtn" onclick="showSummary()">View Summary</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SUMMARY PANEL -->
+<div class="overlay" id="overlay" onclick="closeSummary()"></div>
+<div class="summary-panel" id="summaryPanel">
+  <button class="summary-close" onclick="closeSummary()">&times;</button>
+  <h2>REVIEW SUMMARY</h2>
+  <div class="summary-subtitle">Byron's ICON Amsterdam Wardrobe</div>
+  <div id="summaryContent"></div>
+</div>
+
+<script>
+// ── ITEM DATA ──
+const items = [
+  // Jackets/Outerwear
+  { name: "The Fermo Peacoat", category: "Jackets & Outerwear", slug: "the-fermo-peacoat" },
+  { name: "The Piero Hooded Puffer", category: "Jackets & Outerwear", slug: "the-piero-hooded-puffer" },
+  { name: "The Bruno Puffer", category: "Jackets & Outerwear", slug: "the-bruno-puffer" },
+  { name: "The Treviso Jacket", category: "Jackets & Outerwear", slug: "the-treviso-jacket" },
+  { name: "The Tech Bomber Jacket", category: "Jackets & Outerwear", slug: "the-tech-bomber-jacket-black" },
+  { name: "The Ciro Varsity Jacket", category: "Jackets & Outerwear", slug: "the-ciro-varsity-jacket" },
+  { name: "The Ermal Coach Jacket", category: "Jackets & Outerwear", slug: "the-ermal-coach-jacket" },
+
+  // Sweaters/Knitwear
+  { name: "The Ari Cardigan", category: "Sweaters & Knitwear", slug: "the-ari-cardigan-1" },
+  { name: "The Fabio Crewneck Sweater", category: "Sweaters & Knitwear", slug: "the-fabio-crewneck-sweater" },
+  { name: "The Savona Crewneck Sweater", category: "Sweaters & Knitwear", slug: "the-savona-crewneck-sweater" },
+  { name: "The Santoni Crewneck Sweater", category: "Sweaters & Knitwear", slug: "the-santoni-crewneck-sweater" },
+  { name: "The Faro Crewneck Sweater", category: "Sweaters & Knitwear", slug: null },
+  { name: "The Faro Zip-Through Hoodie", category: "Sweaters & Knitwear", slug: null },
+  { name: "The Barna Henley Sweater", category: "Sweaters & Knitwear", slug: "the-barna-henley-sweater" },
+  { name: "The Savona Quarter Zip Sweater", category: "Sweaters & Knitwear", slug: "the-savona-quarter-zip-sweater" },
+  { name: "The Santoni Quarter Zip Sweater", category: "Sweaters & Knitwear", slug: "the-santoni-quarter-zip-sweater" },
+  { name: "The Milan Quarter Zip Sweater", category: "Sweaters & Knitwear", slug: "the-milan-quarter-zip-sweater" },
+  { name: "The Milan Crewneck Sweater", category: "Sweaters & Knitwear", slug: "the-milan-crewneck-sweater" },
+
+  // Shirts/Overshirts
+  { name: "The Vito Overshirt", category: "Shirts & Overshirts", slug: "the-vito-overshirt" },
+  { name: "The Pio Faux Suede Overshirt", category: "Shirts & Overshirts", slug: "the-pio-faux-suede-overshirt" },
+  { name: "The Tech Cargo Overshirt", category: "Shirts & Overshirts", slug: "the-tech-cargo-overshirt" },
+  { name: "The Firenze Overshirt", category: "Shirts & Overshirts", slug: "the-firenze-overshirt" },
+  { name: "The Raf Overshirt", category: "Shirts & Overshirts", slug: "the-raf-overshirt" },
+  { name: "The Piega Shirt", category: "Shirts & Overshirts", slug: "the-piega-shirt" },
+
+  // Polos
+  { name: "The Santoni Polo", category: "Polos", slug: "the-santoni-polo" },
+  { name: "The Capri Polo", category: "Polos", slug: "the-capri-polo" },
+  { name: "The Capri Short Sleeve Polo", category: "Polos", slug: "the-capri-short-sleeve-polo" },
+  { name: "The Santoni Short Sleeve Polo", category: "Polos", slug: null },
+  { name: "The Premier Football Polo", category: "Polos", slug: "the-premier-football-polo" },
+  { name: "The Fabio Button Polo", category: "Polos", slug: null },
+  { name: "The Nevio Polo", category: "Polos", slug: "the-nevio-polo" },
+  { name: "The Siro Polo", category: "Polos", slug: "the-siro-polo" },
+  { name: "The Palio Polo", category: "Polos", slug: "the-palio-polo" },
+  { name: "The Ari Polo", category: "Polos", slug: "the-ari-polo" },
+  { name: "The Gia Polo", category: "Polos", slug: "the-gia-polo" },
+  { name: "The Cavo Short Sleeve Polo", category: "Polos", slug: "the-cavo-short-sleeve-polo" },
+  { name: "The Classic Linen Slim Polo", category: "Polos", slug: "the-classic-linen-slim-polo" },
+
+  // T-Shirts
+  { name: "The Desio Slim T-Shirt", category: "T-Shirts", slug: "the-desio-slim-t-shirt" },
+  { name: "The Essential T-Shirt", category: "T-Shirts", slug: "the-essential-t-shirt" },
+  { name: "The Cavo T-Shirt", category: "T-Shirts", slug: "the-cavo-t-shirt" },
+  { name: "The Piega Relaxed T-Shirt", category: "T-Shirts", slug: "the-piega-relaxed-t-shirt" },
+
+  // Pants/Trousers
+  { name: "The Tech Trousers", category: "Pants & Trousers", slug: "the-tech-trousers" },
+  { name: "The Tech Pants", category: "Pants & Trousers", slug: "the-tech-pants" },
+  { name: "The Tech Slim Cargo", category: "Pants & Trousers", slug: "the-tech-slim-cargo" },
+  { name: "The Severo Slim Chino", category: "Pants & Trousers", slug: "the-severo-slim-chino" },
+  { name: "The Savona Jogger", category: "Pants & Trousers", slug: "the-savona-jogger" },
+  { name: "The Piega Regular Pants", category: "Pants & Trousers", slug: "the-piega-regular-pants" },
+  { name: "The Firenze Slim Pants", category: "Pants & Trousers", slug: "the-firenze-slim-pants" },
+  { name: "The Raf Regular Jeans", category: "Pants & Trousers", slug: "the-raf-regular-jeans" },
+  { name: "The Cento Wide Leg Pants", category: "Pants & Trousers", slug: "the-cento-wide-leg-pants" },
+  { name: "The Milan Jogger", category: "Pants & Trousers", slug: "the-milan-jogger" },
+  { name: "The Matteo Slim Jeans", category: "Pants & Trousers", slug: "the-matteo-slim-jeans" },
+
+  // Shorts
+  { name: "The Aldo Slim Shorts", category: "Shorts", slug: "the-aldo-slim-shorts" },
+
+  // Shoes
+  { name: "The Classic Suede Trainers", category: "Shoes", slug: "the-classic-suede-trainer" },
+  { name: "The Stefano Sandals", category: "Shoes", slug: "the-stefano-sandals" },
+  { name: "The Classic Low Loafer", category: "Shoes", slug: "the-classic-low-loafer" },
+
+  // Sets
+  { name: "The Piega Set", category: "Sets", slug: "the-piega-set" },
+  { name: "The Firenze Set", category: "Sets", slug: "the-firenze-set" },
+];
+
+// ── STATE ──
+let selections = {};
+let imageCache = {};
+const BLOB_KEY = 'icon-wardrobe-blob-id';
+let blobId = null;
+let saveTimeout = null;
+
+// ── JSONBLOB PERSISTENCE ──
+async function initStorage() {
+  // Check URL for shared blob ID
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedId = urlParams.get('id');
+
+  if (sharedId) {
+    blobId = sharedId;
+    localStorage.setItem(BLOB_KEY, blobId);
+  } else {
+    blobId = localStorage.getItem(BLOB_KEY);
+  }
+
+  if (blobId) {
+    try {
+      const res = await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}`, {
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.selections) {
+          selections = data.selections;
+        }
+        return;
+      }
+    } catch (e) {
+      console.log('Could not load saved data, starting fresh');
+    }
+  }
+
+  // Create new blob
+  try {
+    const res = await fetch('https://jsonblob.com/api/jsonBlob', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ selections: {}, lastUpdated: new Date().toISOString() })
+    });
+    if (res.ok) {
+      const loc = res.headers.get('Location');
+      blobId = loc ? loc.split('/').pop() : null;
+      if (!blobId) {
+        const data = await res.json();
+        blobId = data.id;
+      }
+      if (blobId) {
+        localStorage.setItem(BLOB_KEY, blobId);
+        updateShareLink();
+      }
+    }
+  } catch (e) {
+    console.log('Could not create cloud storage, using localStorage only');
+  }
+}
+
+async function saveToCloud() {
+  // Always save to localStorage as backup
+  localStorage.setItem('icon-wardrobe-selections', JSON.stringify(selections));
+
+  if (!blobId) return;
+  try {
+    await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        selections,
+        lastUpdated: new Date().toISOString(),
+        totalItems: items.length,
+        answered: Object.keys(selections).length
+      })
+    });
+  } catch (e) {
+    console.log('Cloud save failed, data preserved locally');
+  }
+}
+
+function debouncedSave() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveToCloud, 800);
+}
+
+function updateShareLink() {
+  if (!blobId) return;
+  const shareUrl = `${window.location.origin}${window.location.pathname}?id=${blobId}`;
+  document.getElementById('submitInfo').innerHTML =
+    `Auto-saving &middot; <span style="cursor:pointer;text-decoration:underline;opacity:0.8" onclick="copyShareLink()" title="${shareUrl}">Copy share link</span>`;
+}
+
+function copyShareLink() {
+  if (!blobId) return;
+  const shareUrl = `${window.location.origin}${window.location.pathname}?id=${blobId}`;
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    showToast('Share link copied to clipboard!');
+  }).catch(() => {
+    prompt('Share this link:', shareUrl);
+  });
+}
+
+// ── IMAGE LOADING ──
+async function loadProductImage(slug) {
+  if (!slug) return null;
+  if (imageCache[slug]) return imageCache[slug];
+  try {
+    const res = await fetch(`https://icon-amsterdam.com/products/${slug}.json`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.product && data.product.images && data.product.images.length > 0) {
+        const imgUrl = data.product.images[0].src;
+        imageCache[slug] = imgUrl;
+        return imgUrl;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+// ── RENDER ──
+function renderItems() {
+  const container = document.getElementById('itemsContainer');
+  const categories = [...new Set(items.map(i => i.category))];
+  let html = '';
+
+  categories.forEach(cat => {
+    html += `<div class="category-label" data-category="${cat}">${cat}</div>`;
+    items.filter(i => i.category === cat).forEach((item, idx) => {
+      const id = item.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const sel = selections[id] || '';
+      const answeredClass = sel ? `answered answered-${sel}` : '';
+      const productUrl = item.slug ? `https://icon-amsterdam.com/products/${item.slug}` : '#';
+
+      html += `
+        <div class="item-card ${answeredClass}" data-id="${id}" data-category="${cat}" id="card-${id}">
+          <div class="item-image" id="img-${id}">
+            <div class="placeholder">ICON.</div>
+          </div>
+          <div class="item-body">
+            <div>
+              <div class="item-name">${item.name}</div>
+              ${item.slug ? `<a href="${productUrl}" target="_blank" class="item-link">View on ICON.Amsterdam &rarr;</a>` : ''}
+            </div>
+            <div class="choices">
+              <button class="choice-btn keep ${sel === 'keep' ? 'selected' : ''}" onclick="select('${id}','keep')">
+                <span>Definitely Keep</span>
+              </button>
+              <button class="choice-btn unsure ${sel === 'unsure' ? 'selected' : ''}" onclick="select('${id}','unsure')">
+                <span>Not Sure</span>
+              </button>
+              <button class="choice-btn giveaway ${sel === 'giveaway' ? 'selected' : ''}" onclick="select('${id}','giveaway')">
+                <span>OK to Give Away</span>
+              </button>
+            </div>
+          </div>
+        </div>`;
+    });
+  });
+
+  container.innerHTML = html;
+
+  // Render filter tabs
+  const filterBar = document.getElementById('filterBar');
+  filterBar.innerHTML = `<button class="filter-btn active" onclick="filterCategory('all', this)">All (${items.length})</button>`;
+  categories.forEach(cat => {
+    const count = items.filter(i => i.category === cat).length;
+    filterBar.innerHTML += `<button class="filter-btn" onclick="filterCategory('${cat}', this)">${cat} (${count})</button>`;
+  });
+
+  // Staggered reveal animation
+  const cards = document.querySelectorAll('.item-card');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 40);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  cards.forEach(card => observer.observe(card));
+
+  // Load images lazily
+  loadAllImages();
+  updateStats();
+  updateShareLink();
+}
+
+async function loadAllImages() {
+  for (const item of items) {
+    if (!item.slug) continue;
+    const id = item.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const imgContainer = document.getElementById(`img-${id}`);
+    if (!imgContainer) continue;
+
+    const imgUrl = await loadProductImage(item.slug);
+    if (imgUrl) {
+      const img = new Image();
+      img.src = imgUrl;
+      img.alt = item.name;
+      img.onload = () => {
+        imgContainer.innerHTML = '';
+        imgContainer.appendChild(img);
+      };
+    }
+  }
+}
+
+// ── SELECTION LOGIC ──
+function select(id, choice) {
+  // Toggle off if same choice
+  if (selections[id] === choice) {
+    delete selections[id];
+  } else {
+    selections[id] = choice;
+  }
+
+  const card = document.getElementById(`card-${id}`);
+  card.classList.remove('answered', 'answered-keep', 'answered-unsure', 'answered-giveaway');
+
+  if (selections[id]) {
+    card.classList.add('answered', `answered-${selections[id]}`);
+  }
+
+  // Update buttons
+  card.querySelectorAll('.choice-btn').forEach(btn => {
+    btn.classList.remove('selected');
+    if (btn.classList.contains(selections[id])) {
+      btn.classList.add('selected');
+    }
+  });
+
+  // Quick pulse animation on the card
+  card.style.transform = 'scale(0.98)';
+  setTimeout(() => card.style.transform = '', 150);
+
+  updateStats();
+  debouncedSave();
+}
+
+function updateStats() {
+  const vals = Object.values(selections);
+  const keepCount = vals.filter(v => v === 'keep').length;
+  const unsureCount = vals.filter(v => v === 'unsure').length;
+  const giveawayCount = vals.filter(v => v === 'giveaway').length;
+  const total = vals.length;
+
+  document.getElementById('countKeep').textContent = keepCount;
+  document.getElementById('countUnsure').textContent = unsureCount;
+  document.getElementById('countGiveaway').textContent = giveawayCount;
+
+  document.getElementById('progressFill').style.width = `${(total / items.length) * 100}%`;
+  document.getElementById('progressText').textContent = `${total} / ${items.length}`;
+
+  // Show submit bar when at least 1 selection
+  document.getElementById('submitSection').classList.toggle('visible', total > 0);
+}
+
+// ── FILTER ──
+function filterCategory(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.item-card').forEach(card => {
+    if (cat === 'all' || card.dataset.category === cat) {
+      card.classList.remove('filter-hidden');
+    } else {
+      card.classList.add('filter-hidden');
+    }
+  });
+
+  document.querySelectorAll('.category-label').forEach(label => {
+    if (cat === 'all' || label.dataset.category === cat) {
+      label.style.display = '';
+    } else {
+      label.style.display = 'none';
+    }
+  });
+}
+
+// ── SUMMARY ──
+function showSummary() {
+  const content = document.getElementById('summaryContent');
+  const groups = { keep: [], unsure: [], giveaway: [] };
+  const unanswered = [];
+
+  items.forEach(item => {
+    const id = item.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const sel = selections[id];
+    if (sel) {
+      groups[sel].push(item.name);
+    } else {
+      unanswered.push(item.name);
+    }
+  });
+
+  let html = '';
+
+  if (groups.keep.length) {
+    html += `<div class="summary-group keep">
+      <h3><span class="sdot"></span> Definitely Keep (${groups.keep.length})</h3>
+      <ul>${groups.keep.map(n => `<li>${n}</li>`).join('')}</ul>
+    </div>`;
+  }
+  if (groups.unsure.length) {
+    html += `<div class="summary-group unsure">
+      <h3><span class="sdot"></span> Not Sure (${groups.unsure.length})</h3>
+      <ul>${groups.unsure.map(n => `<li>${n}</li>`).join('')}</ul>
+    </div>`;
+  }
+  if (groups.giveaway.length) {
+    html += `<div class="summary-group giveaway">
+      <h3><span class="sdot"></span> OK to Give Away (${groups.giveaway.length})</h3>
+      <ul>${groups.giveaway.map(n => `<li>${n}</li>`).join('')}</ul>
+    </div>`;
+  }
+  if (unanswered.length) {
+    html += `<div class="summary-unanswered">
+      <strong>${unanswered.length} items</strong> not yet reviewed: ${unanswered.join(', ')}
+    </div>`;
+  }
+
+  content.innerHTML = html;
+  document.getElementById('overlay').classList.add('visible');
+  document.getElementById('summaryPanel').classList.add('visible');
+}
+
+function closeSummary() {
+  document.getElementById('overlay').classList.remove('visible');
+  document.getElementById('summaryPanel').classList.remove('visible');
+}
+
+// ── TOAST ──
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ── INIT ──
+async function init() {
+  await initStorage();
+  renderItems();
+
+  // Hide loader
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+  }, 2200);
+}
+
+init();
+</script>
+
+</body>
+</html>
