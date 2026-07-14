@@ -443,32 +443,37 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 700px) {
-    .item-card { flex-direction: column; }
-    .item-image { width: 100%; height: 180px; }
+    .item-card { flex-direction: row; }
+    .item-image { width: 75px; min-height: 75px; }
     .item-body {
-      flex-direction: column; align-items: stretch;
-      gap: 14px; padding: 14px 16px;
+      flex-direction: column; align-items: flex-start;
+      gap: 8px; padding: 10px 12px;
     }
-    .choices { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .item-name { max-width: 100%; font-size: 0.8rem; }
+    .item-link { font-size: 0.55rem; margin-top: 2px; }
+    .choices { width: 100%; display: flex; gap: 4px; }
     .choice-btn {
-      text-align: center; padding: 12px 6px;
-      font-size: 0.65rem;
+      flex: 1; text-align: center;
+      padding: 7px 4px; font-size: 0.55rem;
+      letter-spacing: 0;
     }
     .choice-btn .full-label { display: none; }
     .choice-btn .short-label { display: inline; }
-    .item-name { max-width: 100%; font-size: 0.95rem; }
-    .stats-bar { padding: 12px 16px; }
-    .stats-inner { gap: 14px; flex-wrap: wrap; justify-content: center; }
-    .stat { font-size: 0.7rem; }
-    .submit-inner { flex-direction: column; gap: 12px; text-align: center; }
-    .submit-section { padding: 16px 20px; }
-    .filter-bar { padding: 0 12px; gap: 6px; }
-    .filter-btn { padding: 6px 10px; font-size: 0.6rem; }
-    header { padding: 24px 16px 18px; }
-    header h1 { font-size: 1.3rem; }
-    .progress-wrap { padding: 0 16px 14px; }
-    .container { padding: 0 12px; margin-bottom: 140px; }
-    .category-label { padding: 20px 0 10px; font-size: 0.65rem; }
+    .choice-btn.selected { transform: scale(1.02); }
+    .stats-bar { padding: 10px 16px; }
+    .stats-inner { gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .stat { font-size: 0.65rem; }
+    .submit-inner { flex-direction: column; gap: 10px; text-align: center; }
+    .submit-section { padding: 14px 16px; }
+    .filter-bar { padding: 0 10px; gap: 4px; }
+    .filter-btn { padding: 5px 9px; font-size: 0.55rem; }
+    header { padding: 22px 16px 16px; }
+    header h1 { font-size: 1.2rem; }
+    header p { font-size: 0.65rem; }
+    .progress-wrap { padding: 0 16px 12px; }
+    .container { padding: 0 10px; margin-bottom: 120px; }
+    .category-label { padding: 18px 0 8px; font-size: 0.6rem; }
+    .item-card { margin-bottom: 8px; }
   }
   @media (min-width: 701px) {
     .choice-btn .short-label { display: none; }
