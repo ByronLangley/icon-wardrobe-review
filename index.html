@@ -601,61 +601,28 @@ const items = [
 // ── STATE ──
 let selections = {};
 let imageCache = {};
-const BLOB_KEY = 'icon-wardrobe-blob-id';
-let blobId = null;
+const BLOB_ID = '019f5fbf-de34-7ae4-8879-8f6810ec0394';
 let saveTimeout = null;
 
 // ── JSONBLOB PERSISTENCE ──
 async function initStorage() {
-  // Check URL for shared blob ID
-  const urlParams = new URLSearchParams(window.location.search);
-  const sharedId = urlParams.get('id');
-
-  if (sharedId) {
-    blobId = sharedId;
-    localStorage.setItem(BLOB_KEY, blobId);
-  } else {
-    blobId = localStorage.getItem(BLOB_KEY);
-  }
-
-  if (blobId) {
-    try {
-      const res = await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}`, {
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.selections) {
-          selections = data.selections;
-        }
-        return;
-      }
-    } catch (e) {
-      console.log('Could not load saved data, starting fresh');
-    }
-  }
-
-  // Create new blob
   try {
-    const res = await fetch('https://jsonblob.com/api/jsonBlob', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ selections: {}, lastUpdated: new Date().toISOString() })
+    const res = await fetch(`https://jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
     });
     if (res.ok) {
-      const loc = res.headers.get('Location');
-      blobId = loc ? loc.split('/').pop() : null;
-      if (!blobId) {
-        const data = await res.json();
-        blobId = data.id;
-      }
-      if (blobId) {
-        localStorage.setItem(BLOB_KEY, blobId);
-        updateShareLink();
+      const data = await res.json();
+      if (data.selections) {
+        selections = data.selections;
       }
     }
   } catch (e) {
-    console.log('Could not create cloud storage, using localStorage only');
+    console.log('Could not load saved data, starting fresh');
+    // Fall back to localStorage
+    const local = localStorage.getItem('icon-wardrobe-selections');
+    if (local) {
+      try { selections = JSON.parse(local); } catch (e2) {}
+    }
   }
 }
 
@@ -663,9 +630,8 @@ async function saveToCloud() {
   // Always save to localStorage as backup
   localStorage.setItem('icon-wardrobe-selections', JSON.stringify(selections));
 
-  if (!blobId) return;
   try {
-    await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}`, {
+    await fetch(`https://jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
@@ -686,20 +652,8 @@ function debouncedSave() {
 }
 
 function updateShareLink() {
-  if (!blobId) return;
-  const shareUrl = `${window.location.origin}${window.location.pathname}?id=${blobId}`;
   document.getElementById('submitInfo').innerHTML =
-    `Auto-saving &middot; <span style="cursor:pointer;text-decoration:underline;opacity:0.8" onclick="copyShareLink()" title="${shareUrl}">Copy share link</span>`;
-}
-
-function copyShareLink() {
-  if (!blobId) return;
-  const shareUrl = `${window.location.origin}${window.location.pathname}?id=${blobId}`;
-  navigator.clipboard.writeText(shareUrl).then(() => {
-    showToast('Share link copied to clipboard!');
-  }).catch(() => {
-    prompt('Share this link:', shareUrl);
-  });
+    'All selections auto-save to the cloud';
 }
 
 // ── IMAGE LOADING ──
