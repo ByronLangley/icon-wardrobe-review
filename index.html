@@ -632,7 +632,7 @@ let saveTimeout = null;
 // ── JSONBLOB PERSISTENCE ──
 async function initStorage() {
   try {
-    const res = await fetch(`https://jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
+    const res = await fetch(`https://api.jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
     });
     if (res.ok) {
@@ -656,7 +656,7 @@ async function saveToCloud() {
   localStorage.setItem('icon-wardrobe-selections', JSON.stringify(selections));
 
   try {
-    await fetch(`https://jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
+    await fetch(`https://api.jsonblob.com/api/jsonBlob/${BLOB_ID}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({
